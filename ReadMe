@@ -1,0 +1,56 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+ Spatially Varying Model (SVM)
+
+SVM.pro  : in IDL (tested in version 8.5.1)
+SVM.py   : in Python (tested in version 2.7.13)
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ This function generates a probability density function using
+ Monte-Carlo-Markov-Chains technique, from the target itself.
+ Best for using for the artificial star experiment, the PDF 
+ provides by this function can be used for the location of 
+ the artificial stars in your imaging data.
+ INPUTS:
+   idim,jdim: (integer) dimensions of your image
+   xarrcat,yarrcat,magarrcat: (3 arrays with same lengths) position and magnitudes of the detected sources in observed catalogue
+   ArtificialMag: (float value) the magnitude of the artificial star which is going to be added on the original image.
+   mcmcPAR: [N,Sigma] parameters for the MCMC calculation, N is the number of generated positions
+       suggesting value is above 10^5, Sigma is the sigma of the gaussian function using in the MCMC technique to 
+       search for the random positions (suggesting value is 20 for the analysis of the image with angular resolution (FWHM of the PSF) of about 2.5 pixels
+       Note that, if the imaging field is not crowded, then the larger value of sigma is needed, so that MCMC technique could search
+       for positions in a larger domain.
+ OUTPUT: is the two dimension array providing the PDF of the positions for artificial stars (X,Y). the length of X,Y positions is N in mcmcPAR      
+ 
+  User can randomly sample the positions of the artificial star with magnitude of ArtificialMag among the provided X,Y
+  
+  Calling sequence:
+  
+   myoutput=SVM(idim,jdim, xarrcat, yarrcat, magarrcat, ArtificialMag,[N,Sigma]) 
+   Xoutput=myoutput[*,0]
+   Youtput=myoutput[*,1]
+
+ Example:
+ observing image size=800x800
+ position and magnitude of the detected sources in the catalogue: Xarr,Yarr,mag
+ artificial star magnitude = 17.0
+ we want to generate 10^6 positions
+
+IDL:
+  myoutput=SVM(800,800,Xarr,Yarr,mag,17.0,[1000000,20])
+  openw,lun,'test',/get_lun
+  for ii=0,(size(myoutput))[1]-1 do printf,lun,myoutput[ii,0],myoutput[ii,1]
+  close,lun
+  free_lun,lun
+
+Python:
+  lun=open('test',"w")
+  myoutput=SVM(800,800,Xarr,Yarr,mag,17.0,[1000000,2.])
+  for ii in range(Nmcmc): lun.write("%13.4f %13.4f \n" %(myoutput[ii,0],myoutput[ii,1]))
+
+
+If you plot 'test' columns1,2, it should be resembeling the shape of your cluster (image) where it is equal or brighter than magnitude 17.
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+ Written by Z. Khorrami
+ Updated Aug. 2019
+ Contact: KhorramiZ@cardiff.ac.uk
+----------------------------------------------------------------------------------------------------------------------------------------------------------
